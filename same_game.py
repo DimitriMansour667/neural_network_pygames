@@ -6,7 +6,7 @@ from neural_network import neural_network
 random.seed(42)
 
 # Initialize neural network (4 inputs: ball_x, hole_left_x, hole_right_x, distance_to_wall)
-nn = neural_network(200, 10, 4, 2)
+nn = neural_network(200, 10, 4, 3, 2)
 nn.populate()
 
 # Game Constants
@@ -15,7 +15,7 @@ BALL_SIZE = 30
 BALL_SPEED = 10
 WALL_HEIGHT = 40
 WALL_SPEED = 5
-HOLE_WIDTH = 100
+HOLE_WIDTH = 60
 SPAWN_INTERVAL = 50  # Frames between wall spawns
 MIN_FPS = 5
 MAX_FPS = 1020
@@ -126,12 +126,14 @@ while running:
                 inputs = get_inputs(game_agent.x, game_state["walls"], HEIGHT - 50)
                 # Get decision from neural network
                 decision = game_agent.nn_agent.think(inputs)
-                
-                # Move agent based on neural network output
-                if decision > 0.5 and game_agent.x < WIDTH - BALL_SIZE:
-                    game_agent.x += BALL_SPEED
-                elif decision <= 0.5 and game_agent.x > 0:
-                    game_agent.x -= BALL_SPEED
+                best_move = decision.index(max(decision))  # Get the index of the highest value
+
+                if best_move == 0 and game_agent.x > 0:
+                    game_agent.x -= BALL_SPEED  # Move left
+                elif best_move == 2 and game_agent.x < WIDTH - BALL_SIZE:
+                    game_agent.x += BALL_SPEED  # Move right
+                elif best_move == 1:
+                    game_agent.x = game_agent.x
 
                 # Draw agent
                 color = BLUE if game_agent.alive else RED
